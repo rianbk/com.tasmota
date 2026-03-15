@@ -1,6 +1,5 @@
 {
   "1.0.0": {
-    "en": "Initial release: automatic Tasmota device discovery via MQTT native protocol, full control of Tasmota lights (dimmer, color temperature, RGB, RGBCW), WiFi signal strength monitoring, TLS support for secure MQTT connections.",
-    "nl": "Eerste versie: automatische Tasmota-apparaatdetectie via het MQTT-native protocol, volledige bediening van Tasmota-lampen (dimmer, kleurtemperatuur, RGB, RGBCW), WiFi-signaalsterktemonitoring, TLS-ondersteuning voor beveiligde MQTT-verbindingen."
+    "en": "Initial release: automatic Tasmota device discovery via MQTT native protocol, full control of Tasmota lights (dimmer, color temperature, RGB, RGBCW), WiFi signal strength monitoring, TLS support for secure MQTT connections."
   }
 }

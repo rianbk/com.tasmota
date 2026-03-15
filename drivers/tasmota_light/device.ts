@@ -63,6 +63,21 @@ export default class TasmotaLightDevice extends TasmotaDeviceBase {
     }, 500);
   }
 
+  async onSettings({ oldSettings, newSettings, changedKeys }: {
+    oldSettings: Record<string, unknown>;
+    newSettings: Record<string, unknown>;
+    changedKeys: string[];
+  }): Promise<void> {
+    await super.onSettings({ oldSettings, newSettings, changedKeys });
+
+    if (changedKeys.includes('fade')) {
+      this.sendCommand('Fade', newSettings.fade ? '1' : '0');
+    }
+    if (changedKeys.includes('speed')) {
+      this.sendCommand('Speed', String(newSettings.speed));
+    }
+  }
+
   protected override onTasmotaState(data: Record<string, unknown>): void {
     super.onTasmotaState(data);
 
@@ -116,6 +131,18 @@ export default class TasmotaLightDevice extends TasmotaDeviceBase {
     }
 
     // WiFi RSSI is handled by the base class
+
+    // Sync Fade and Speed settings from device state
+    const settingsUpdate: Record<string, unknown> = {};
+    if (typeof data['Fade'] === 'string') {
+      settingsUpdate.fade = data['Fade'] === 'ON';
+    }
+    if (typeof data['Speed'] === 'number') {
+      settingsUpdate.speed = data['Speed'];
+    }
+    if (Object.keys(settingsUpdate).length > 0) {
+      this.setSettings(settingsUpdate).catch(this.error);
+    }
   }
 }
 

@@ -68,6 +68,7 @@ export default class TasmotaDeviceBase extends Homey.Device {
       } else if (lwtPayload === (settings.onln as string).toLowerCase()) {
         this.setAvailable().catch(this.error);
         this.requestState();
+        this.sendCommand('PowerOnState', '');
       }
       return;
     }
@@ -110,6 +111,21 @@ export default class TasmotaDeviceBase extends Homey.Device {
       if (typeof wifi['RSSI'] === 'number' && this.hasCapability('measure_wifi_percent')) {
         this.setCapabilityValue('measure_wifi_percent', wifi['RSSI']).catch(this.error);
       }
+    }
+
+    // Sync PowerOnState from RESULT
+    if (typeof _data['PowerOnState'] === 'number') {
+      this.setSettings({ power_on_state: String(_data['PowerOnState']) }).catch(this.error);
+    }
+  }
+
+  async onSettings({ oldSettings, newSettings, changedKeys }: {
+    oldSettings: Record<string, unknown>;
+    newSettings: Record<string, unknown>;
+    changedKeys: string[];
+  }): Promise<void> {
+    if (changedKeys.includes('power_on_state')) {
+      this.sendCommand('PowerOnState', newSettings.power_on_state as string);
     }
   }
 

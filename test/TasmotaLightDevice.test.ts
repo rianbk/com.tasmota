@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 
 /**
  * Tests for TasmotaLightDevice capability listener logic.
@@ -16,6 +16,12 @@ interface MockDevice {
   settings: Record<string, unknown>;
   /** The handler registered via registerMultipleCapabilityListener */
   handler: (values: Record<string, unknown>) => Promise<void>;
+  /** Simulate onSettings call (base + light device logic) */
+  onSettings: (args: { oldSettings: Record<string, unknown>; newSettings: Record<string, unknown>; changedKeys: string[] }) => Promise<void>;
+  /** Simulate onTasmotaState (base + light device logic) */
+  onTasmotaState: (data: Record<string, unknown>) => void;
+  /** Spy for setSettings calls */
+  setSettingsSpy: Mock;
 }
 
 /**
@@ -109,7 +115,51 @@ function createMockDevice(opts?: {
     }
   };
 
-  return { commands, capabilities: capValues, settings, handler };
+  const setSettingsSpy = vi.fn().mockResolvedValue(undefined);
+
+  // Simulate base class onSettings (PowerOnState)
+  const baseOnSettings = async (args: { oldSettings: Record<string, unknown>; newSettings: Record<string, unknown>; changedKeys: string[] }): Promise<void> => {
+    if (args.changedKeys.includes('power_on_state')) {
+      sendCommand('PowerOnState', args.newSettings.power_on_state as string);
+    }
+  };
+
+  // Simulate light device onSettings (Fade, Speed) + calls super
+  const onSettings = async (args: { oldSettings: Record<string, unknown>; newSettings: Record<string, unknown>; changedKeys: string[] }): Promise<void> => {
+    await baseOnSettings(args);
+    if (args.changedKeys.includes('fade')) {
+      sendCommand('Fade', args.newSettings.fade ? '1' : '0');
+    }
+    if (args.changedKeys.includes('speed')) {
+      sendCommand('Speed', String(args.newSettings.speed));
+    }
+  };
+
+  // Simulate base class onTasmotaState (WiFi + PowerOnState sync)
+  const baseOnTasmotaState = (data: Record<string, unknown>): void => {
+    if (typeof data['PowerOnState'] === 'number') {
+      setSettingsSpy({ power_on_state: String(data['PowerOnState']) });
+    }
+  };
+
+  // Simulate light device onTasmotaState (full state parsing + settings sync)
+  const onTasmotaState = (data: Record<string, unknown>): void => {
+    baseOnTasmotaState(data);
+
+    // Sync Fade and Speed
+    const settingsUpdate: Record<string, unknown> = {};
+    if (typeof data['Fade'] === 'string') {
+      settingsUpdate.fade = data['Fade'] === 'ON';
+    }
+    if (typeof data['Speed'] === 'number') {
+      settingsUpdate.speed = data['Speed'];
+    }
+    if (Object.keys(settingsUpdate).length > 0) {
+      setSettingsSpy(settingsUpdate);
+    }
+  };
+
+  return { commands, capabilities: capValues, settings, handler, onSettings, onTasmotaState, setSettingsSpy };
 }
 
 // --- Tests ---
@@ -269,6 +319,74 @@ describe('TasmotaLightDevice capability coupling', () => {
     it('light_mode alone while on sends no commands (mode is implicit)', async () => {
       await device.handler({ light_mode: 'temperature' });
       expect(device.commands).toEqual([]);
+    });
+  });
+});
+
+describe('TasmotaLightDevice settings', () => {
+  let device: MockDevice;
+
+  beforeEach(() => {
+    device = createMockDevice();
+  });
+
+  describe('onSettings sends commands', () => {
+    it('PowerOnState change sends PowerOnState command', async () => {
+      await device.onSettings({
+        oldSettings: { power_on_state: '3' },
+        newSettings: { power_on_state: '0' },
+        changedKeys: ['power_on_state'],
+      });
+      expect(device.commands).toEqual([{ command: 'PowerOnState', payload: '0' }]);
+    });
+
+    it('Fade enabled sends Fade 1', async () => {
+      await device.onSettings({
+        oldSettings: { fade: false },
+        newSettings: { fade: true },
+        changedKeys: ['fade'],
+      });
+      expect(device.commands).toEqual([{ command: 'Fade', payload: '1' }]);
+    });
+
+    it('Fade disabled sends Fade 0', async () => {
+      await device.onSettings({
+        oldSettings: { fade: true },
+        newSettings: { fade: false },
+        changedKeys: ['fade'],
+      });
+      expect(device.commands).toEqual([{ command: 'Fade', payload: '0' }]);
+    });
+
+    it('Speed change sends Speed command with value', async () => {
+      await device.onSettings({
+        oldSettings: { speed: 4 },
+        newSettings: { speed: 20 },
+        changedKeys: ['speed'],
+      });
+      expect(device.commands).toEqual([{ command: 'Speed', payload: '20' }]);
+    });
+  });
+
+  describe('state sync updates settings', () => {
+    it('STATE with Fade and Speed updates settings', () => {
+      device.onTasmotaState({ Fade: 'ON', Speed: 10 });
+      expect(device.setSettingsSpy).toHaveBeenCalledWith({ fade: true, speed: 10 });
+    });
+
+    it('STATE with Fade OFF syncs false', () => {
+      device.onTasmotaState({ Fade: 'OFF', Speed: 4 });
+      expect(device.setSettingsSpy).toHaveBeenCalledWith({ fade: false, speed: 4 });
+    });
+
+    it('RESULT with PowerOnState updates settings', () => {
+      device.onTasmotaState({ PowerOnState: 2 });
+      expect(device.setSettingsSpy).toHaveBeenCalledWith({ power_on_state: '2' });
+    });
+
+    it('state without Fade/Speed/PowerOnState does not call setSettings', () => {
+      device.onTasmotaState({ POWER: 'ON', Dimmer: 50 });
+      expect(device.setSettingsSpy).not.toHaveBeenCalled();
     });
   });
 });

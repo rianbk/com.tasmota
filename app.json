@@ -9,12 +9,10 @@
     "local"
   ],
   "name": {
-    "en": "Tasmota",
-    "nl": "Tasmota"
+    "en": "Tasmota"
   },
   "description": {
-    "en": "Your Tasmota devices, right on Homey",
-    "nl": "Je Tasmota-apparaten, direct op Homey"
+    "en": "Your Tasmota devices, right on Homey"
   },
   "category": [
     "lights"
@@ -37,14 +35,6 @@
       "wifi light",
       "esp8266",
       "esp32"
-    ],
-    "nl": [
-      "tasmota",
-      "mqtt",
-      "slimme lamp",
-      "wifi lamp",
-      "esp8266",
-      "esp32"
     ]
   },
   "bugs": {
@@ -61,8 +51,7 @@
   "drivers": [
     {
       "name": {
-        "en": "Tasmota Light",
-        "nl": "Tasmota Lamp"
+        "en": "Tasmota Light"
       },
       "class": "light",
       "connectivity": [
@@ -81,17 +70,125 @@
       "capabilitiesOptions": {
         "measure_signal_strength": {
           "title": {
-            "en": "WiFi Signal",
-            "nl": "WiFi-signaal"
+            "en": "WiFi Signal"
           }
         },
         "measure_wifi_percent": {
           "title": {
-            "en": "WiFi Quality",
-            "nl": "WiFi-kwaliteit"
+            "en": "WiFi Quality"
           }
         }
       },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Behavior"
+          },
+          "children": [
+            {
+              "id": "power_on_state",
+              "type": "dropdown",
+              "label": {
+                "en": "Power-on state"
+              },
+              "value": "3",
+              "values": [
+                {
+                  "id": "0",
+                  "label": {
+                    "en": "Off"
+                  }
+                },
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "On"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "Toggle"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "Last state"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Transitions"
+          },
+          "children": [
+            {
+              "id": "fade",
+              "type": "checkbox",
+              "label": {
+                "en": "Fade"
+              },
+              "value": false
+            },
+            {
+              "id": "speed",
+              "type": "number",
+              "label": {
+                "en": "Speed"
+              },
+              "value": 4,
+              "min": 1,
+              "max": 40
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Device info"
+          },
+          "children": [
+            {
+              "id": "mac",
+              "type": "label",
+              "label": {
+                "en": "MAC address"
+              },
+              "value": ""
+            },
+            {
+              "id": "ip",
+              "type": "label",
+              "label": {
+                "en": "IP address"
+              },
+              "value": ""
+            },
+            {
+              "id": "model",
+              "type": "label",
+              "label": {
+                "en": "Model"
+              },
+              "value": ""
+            },
+            {
+              "id": "firmware",
+              "type": "label",
+              "label": {
+                "en": "Firmware"
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
       "pair": [
         {
           "id": "list_devices",
@@ -123,8 +220,7 @@
     "measure_wifi_percent": {
       "type": "number",
       "title": {
-        "en": "WiFi Quality",
-        "nl": "WiFi-kwaliteit"
+        "en": "WiFi Quality"
       },
       "units": {
         "en": "%"

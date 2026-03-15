@@ -11,7 +11,9 @@ homey app run          # Deploy to Homey and run (requires Homey CLI)
 homey app validate     # Validate app structure before publishing
 ```
 
-No test suite exists yet. Verify changes by running `homey app run` and testing device behavior manually.
+```bash
+npm test               # Run vitest test suite
+```
 
 ## Architecture
 
@@ -36,7 +38,7 @@ Tasmota Device ←→ MQTT Broker ←→ MqttClient ←→ App (router) ←→ D
 Drivers use a two-tier base class hierarchy:
 
 - **`TasmotaDriverBase`** → concrete driver (e.g., `TasmotaLightDriver`) — handles pairing by querying DiscoveryManager's cache.
-- **`TasmotaDeviceBase`** → concrete device (e.g., `TasmotaLightDevice`) — registers an MQTT message handler with the app, handles LWT availability, parses STATE/RESULT/SENSOR payloads, and delegates to subclass overrides (`onTasmotaState`, `onTasmotaSensor`, `onMqttMessage`). Implements both `onUninit()` (app stop) and `onDeleted()` (device removed) for cleanup.
+- **`TasmotaDeviceBase`** → concrete device (e.g., `TasmotaLightDevice`) — registers an MQTT message handler with the app, handles LWT availability, parses STATE/RESULT/SENSOR payloads, and delegates to subclass overrides (`onTasmotaState`, `onTasmotaSensor`, `onMqttMessage`). Implements both `onUninit()` (app stop) and `onDeleted()` (device removed) for cleanup. Handles `onSettings()` for `PowerOnState` and queries it when device comes online.
 
 To add a new device type: create a new driver folder under `drivers/`, extend the base classes, implement `filterDevice()` on the driver and state/capability handlers on the device.
 
@@ -59,3 +61,15 @@ Light capabilities (`onoff`, `dim`, `light_temperature`, `light_hue`, `light_sat
 - `dim` to 0 turns off; `dim` from 0 turns on
 - Color/temperature changes while off do NOT turn the device on
 - Energy approximation is configured in `driver.compose.json` (9W on, 0.5W standby)
+
+### Driver Settings
+
+Driver settings are defined in `driver.compose.json` and synced from the device:
+- **PowerOnState** (base class) — dropdown, synced from RESULT, sent via `PowerOnState` command
+- **Fade** (light) — checkbox, synced from STATE `Fade` field, sent via `Fade 0|1`
+- **Speed** (light) — number 1-40, synced from STATE `Speed` field, sent via `Speed N`
+- **Device info** (mac, ip, model, firmware) — read-only labels populated during pairing
+
+### Localization
+
+English only (`en`). No other locale files.
