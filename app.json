@@ -1,0 +1,141 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.tasmota-mqtt",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "runtime": "nodejs",
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Tasmota",
+    "nl": "Tasmota"
+  },
+  "description": {
+    "en": "Your Tasmota devices, right on Homey",
+    "nl": "Je Tasmota-apparaten, direct op Homey"
+  },
+  "category": [
+    "lights"
+  ],
+  "permissions": [],
+  "brandColor": "#1FA3EC",
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "rbk"
+  },
+  "tags": {
+    "en": [
+      "tasmota",
+      "mqtt",
+      "smart light",
+      "wifi light",
+      "esp8266",
+      "esp32"
+    ],
+    "nl": [
+      "tasmota",
+      "mqtt",
+      "slimme lamp",
+      "wifi lamp",
+      "esp8266",
+      "esp32"
+    ]
+  },
+  "bugs": {
+    "url": "https://github.com/rbk/com.tasmota-mqtt/issues"
+  },
+  "source": "https://github.com/rbk/com.tasmota-mqtt",
+  "homepage": "https://github.com/rbk/com.tasmota-mqtt#readme",
+  "api": {
+    "getMqttStatus": {
+      "method": "get",
+      "path": "/mqtt-status"
+    }
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Tasmota Light",
+        "nl": "Tasmota Lamp"
+      },
+      "class": "light",
+      "connectivity": [
+        "lan"
+      ],
+      "capabilities": [
+        "onoff",
+        "dim",
+        "light_temperature",
+        "light_hue",
+        "light_saturation",
+        "light_mode",
+        "measure_signal_strength",
+        "measure_wifi_percent"
+      ],
+      "capabilitiesOptions": {
+        "measure_signal_strength": {
+          "title": {
+            "en": "WiFi Signal",
+            "nl": "WiFi-signaal"
+          }
+        },
+        "measure_wifi_percent": {
+          "title": {
+            "en": "WiFi Quality",
+            "nl": "WiFi-kwaliteit"
+          }
+        }
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "energy": {
+        "approximation": {
+          "usageOn": 9,
+          "usageOff": 0.5
+        }
+      },
+      "images": {
+        "small": "/drivers/tasmota_light/assets/small.png",
+        "large": "/drivers/tasmota_light/assets/large.png",
+        "xlarge": "/drivers/tasmota_light/assets/xlarge.png"
+      },
+      "id": "tasmota_light"
+    }
+  ],
+  "capabilities": {
+    "measure_wifi_percent": {
+      "type": "number",
+      "title": {
+        "en": "WiFi Quality",
+        "nl": "WiFi-kwaliteit"
+      },
+      "units": {
+        "en": "%"
+      },
+      "uiComponent": "sensor",
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "decimals": 0,
+      "min": 0,
+      "max": 100
+    }
+  }
+}

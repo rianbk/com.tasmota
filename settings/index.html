@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <style>
+    .mqtt-status { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; }
+    .mqtt-status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+    .mqtt-status-dot.connected { background: #2ecc71; }
+    .mqtt-status-dot.disconnected { background: #e74c3c; }
+    .field-error { color: #e74c3c; font-size: 12px; margin-top: 4px; display: none; }
+    input.invalid { border-color: #e74c3c; }
+  </style>
+</head>
+<body>
+  <div class="mqtt-status">
+    <span class="mqtt-status-dot" id="mqtt_status_dot"></span>
+    <span id="mqtt_status_text" data-i18n="settings.status_checking">Checking...</span>
+  </div>
+
+  <form class="homey-form">
+    <fieldset class="homey-form-fieldset">
+      <legend class="homey-form-legend" data-i18n="settings.section_connection">Connection</legend>
+
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="mqtt_host" data-i18n="settings.mqtt_host">MQTT Broker Host</label>
+        <input class="homey-form-input" type="text" id="mqtt_host" data-i18n-placeholder="settings.mqtt_host_placeholder" placeholder="192.168.1.100">
+        <div class="field-error" id="mqtt_host_error" data-i18n="settings.error_host_required">Host is required</div>
+      </div>
+
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="mqtt_port" data-i18n="settings.mqtt_port">Port</label>
+        <input class="homey-form-input" type="number" id="mqtt_port" value="1883" min="1" max="65535">
+        <div class="field-error" id="mqtt_port_error" data-i18n="settings.error_port_range">Port must be between 1 and 65535</div>
+      </div>
+
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="mqtt_username" data-i18n="settings.mqtt_username_optional">Username (optional)</label>
+        <input class="homey-form-input" type="text" id="mqtt_username">
+      </div>
+
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="mqtt_password" data-i18n="settings.mqtt_password_optional">Password (optional)</label>
+        <input class="homey-form-input" type="password" id="mqtt_password">
+      </div>
+
+      <div class="homey-form-group">
+        <label class="homey-form-checkbox">
+          <input class="homey-form-checkbox-input" type="checkbox" id="mqtt_tls">
+          <span class="homey-form-checkbox-checkmark"></span>
+          <span class="homey-form-checkbox-text" data-i18n="settings.mqtt_tls">Enable TLS</span>
+        </label>
+      </div>
+
+      <div class="homey-form-group">
+        <label class="homey-form-checkbox">
+          <input class="homey-form-checkbox-input" type="checkbox" id="mqtt_verify_tls">
+          <span class="homey-form-checkbox-checkmark"></span>
+          <span class="homey-form-checkbox-text" data-i18n="settings.mqtt_verify_tls">Verify TLS certificate</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="homey-form-fieldset">
+      <legend class="homey-form-legend" data-i18n="settings.section_options">Options</legend>
+
+      <div class="homey-form-group">
+        <label class="homey-form-checkbox">
+          <input class="homey-form-checkbox-input" type="checkbox" id="show_offline_devices">
+          <span class="homey-form-checkbox-checkmark"></span>
+          <span class="homey-form-checkbox-text" data-i18n="settings.show_offline_devices">Show offline devices during pairing</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <button type="button" class="homey-button-primary-full" id="save" data-i18n="settings.save">Save</button>
+    <div class="status" id="status"></div>
+  </form>
+
+  <script type="text/javascript">
+    function onHomeyReady(Homey) {
+      Homey.ready();
+
+      var fields = ['mqtt_host', 'mqtt_port', 'mqtt_username', 'mqtt_password', 'mqtt_tls', 'mqtt_verify_tls', 'show_offline_devices'];
+      var mqttFields = ['mqtt_host', 'mqtt_port', 'mqtt_username', 'mqtt_password', 'mqtt_tls', 'mqtt_verify_tls'];
+      var savedValues = {};
+
+      // MQTT status polling
+      function updateMqttStatus() {
+        Homey.api('GET', '/mqtt-status', function(err, result) {
+          var dot = document.getElementById('mqtt_status_dot');
+          var text = document.getElementById('mqtt_status_text');
+          if (err || !result) {
+            dot.className = 'mqtt-status-dot disconnected';
+            text.textContent = Homey.__('settings.status_disconnected');
+            return;
+          }
+          if (result.connected) {
+            dot.className = 'mqtt-status-dot connected';
+            text.textContent = Homey.__('settings.status_connected');
+          } else {
+            dot.className = 'mqtt-status-dot disconnected';
+            text.textContent = Homey.__('settings.status_disconnected');
+          }
+        });
+      }
+      updateMqttStatus();
+      setInterval(updateMqttStatus, 5000);
+
+      // Load current settings
+      fields.forEach(function(field) {
+        Homey.get(field, function(err, value) {
+          if (err) return;
+          var el = document.getElementById(field);
+          if (el.type === 'checkbox') {
+            el.checked = !!value;
+            savedValues[field] = !!value;
+          } else if (value != null) {
+            el.value = value;
+            savedValues[field] = value;
+          }
+        });
+      });
+
+      function getFieldValue(field) {
+        var el = document.getElementById(field);
+        if (el.type === 'checkbox') return el.checked;
+        if (el.type === 'number') return parseInt(el.value, 10) || 1883;
+        return el.value;
+      }
+
+      function validateFields() {
+        var valid = true;
+        var hostEl = document.getElementById('mqtt_host');
+        var hostErr = document.getElementById('mqtt_host_error');
+        var portEl = document.getElementById('mqtt_port');
+        var portErr = document.getElementById('mqtt_port_error');
+        var port = parseInt(portEl.value, 10);
+
+        if (!hostEl.value.trim()) {
+          hostEl.classList.add('invalid');
+          hostErr.style.display = 'block';
+          valid = false;
+        } else {
+          hostEl.classList.remove('invalid');
+          hostErr.style.display = 'none';
+        }
+
+        if (isNaN(port) || port < 1 || port > 65535) {
+          portEl.classList.add('invalid');
+          portErr.style.display = 'block';
+          valid = false;
+        } else {
+          portEl.classList.remove('invalid');
+          portErr.style.display = 'none';
+        }
+
+        return valid;
+      }
+
+      document.getElementById('save').addEventListener('click', function() {
+        if (!validateFields()) return;
+
+        // Find which fields actually changed
+        var changed = fields.filter(function(field) {
+          return getFieldValue(field) !== savedValues[field];
+        });
+
+        if (changed.length === 0) {
+          document.getElementById('status').textContent = Homey.__('settings.status_no_changes');
+          return;
+        }
+
+        var saved = 0;
+        var mqttChanged = false;
+        changed.forEach(function(field) {
+          var value = getFieldValue(field);
+
+          Homey.set(field, value, function(err) {
+            if (err) {
+              document.getElementById('status').textContent = Homey.__('settings.status_error') + err.message;
+              return;
+            }
+            savedValues[field] = value;
+            if (mqttFields.indexOf(field) !== -1) mqttChanged = true;
+            saved++;
+            if (saved === changed.length) {
+              document.getElementById('status').textContent = Homey.__('settings.status_saved');
+              if (mqttChanged) {
+                // Poll status more frequently while reconnecting
+                var polls = 0;
+                var reconnectPoll = setInterval(function() {
+                  updateMqttStatus();
+                  polls++;
+                  if (polls >= 6) clearInterval(reconnectPoll);
+                }, 2000);
+              }
+            }
+          });
+        });
+      });
+    }
+  </script>
+</body>
+</html>

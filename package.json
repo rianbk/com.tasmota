@@ -1,0 +1,31 @@
+{
+  "name": "com.tasmota-mqtt",
+  "version": "1.0.0",
+  "description": "Control Tasmota devices via MQTT native discovery on Homey",
+  "author": "rbk",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rbk/com.tasmota-mqtt.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "mqtt": "^5.10.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^16.1.8",
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
+    "@types/node": "^22.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-athom": "^3.1.5",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

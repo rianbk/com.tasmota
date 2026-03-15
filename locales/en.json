@@ -1,0 +1,31 @@
+{
+  "drivers": {
+    "tasmota_light": {
+      "name": "Tasmota Light"
+    }
+  },
+  "settings": {
+    "mqtt_host": "MQTT Broker Host",
+    "mqtt_port": "Port",
+    "mqtt_username": "Username",
+    "mqtt_password": "Password",
+    "mqtt_tls": "Enable TLS",
+    "mqtt_verify_tls": "Verify TLS certificate",
+    "show_offline_devices": "Show offline devices during pairing",
+    "title": "MQTT Settings",
+    "section_connection": "Connection",
+    "section_options": "Options",
+    "mqtt_host_placeholder": "192.168.1.100",
+    "mqtt_username_optional": "Username (optional)",
+    "mqtt_password_optional": "Password (optional)",
+    "error_host_required": "Host is required",
+    "error_port_range": "Port must be between 1 and 65535",
+    "save": "Save",
+    "status_checking": "Checking...",
+    "status_connected": "MQTT: connected",
+    "status_disconnected": "MQTT: not connected",
+    "status_saved": "Settings saved.",
+    "status_no_changes": "No changes to save.",
+    "status_error": "Error: "
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "name": {
+    "en": "Tasmota Light",
+    "nl": "Tasmota Lamp"
+  },
+  "class": "light",
+  "connectivity": ["lan"],
+  "capabilities": [
+    "onoff",
+    "dim",
+    "light_temperature",
+    "light_hue",
+    "light_saturation",
+    "light_mode",
+    "measure_signal_strength",
+    "measure_wifi_percent"
+  ],
+  "capabilitiesOptions": {
+    "measure_signal_strength": {
+      "title": {
+        "en": "WiFi Signal",
+        "nl": "WiFi-signaal"
+      }
+    },
+    "measure_wifi_percent": {
+      "title": {
+        "en": "WiFi Quality",
+        "nl": "WiFi-kwaliteit"
+      }
+    }
+  },
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "energy": {
+    "approximation": {
+      "usageOn": 9,
+      "usageOff": 0.5
+    }
+  },
+  "images": {
+    "small": "/drivers/tasmota_light/assets/small.png",
+    "large": "/drivers/tasmota_light/assets/large.png",
+    "xlarge": "/drivers/tasmota_light/assets/xlarge.png"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "com.tasmota-mqtt",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "runtime": "nodejs",
+  "platforms": ["local"],
+  "name": {
+    "en": "Tasmota",
+    "nl": "Tasmota"
+  },
+  "description": {
+    "en": "Your Tasmota devices, right on Homey",
+    "nl": "Je Tasmota-apparaten, direct op Homey"
+  },
+  "category": ["lights"],
+  "permissions": [],
+  "brandColor": "#1FA3EC",
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "rbk"
+  },
+  "tags": {
+    "en": ["tasmota", "mqtt", "smart light", "wifi light", "esp8266", "esp32"],
+    "nl": ["tasmota", "mqtt", "slimme lamp", "wifi lamp", "esp8266", "esp32"]
+  },
+  "bugs": {
+    "url": "https://github.com/rbk/com.tasmota-mqtt/issues"
+  },
+  "source": "https://github.com/rbk/com.tasmota-mqtt",
+  "homepage": "https://github.com/rbk/com.tasmota-mqtt#readme",
+  "api": {
+    "getMqttStatus": {
+      "method": "get",
+      "path": "/mqtt-status"
+    }
+  }
+}

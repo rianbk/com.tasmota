@@ -1,0 +1,17 @@
+{
+  "type": "number",
+  "title": {
+    "en": "WiFi Quality",
+    "nl": "WiFi-kwaliteit"
+  },
+  "units": {
+    "en": "%"
+  },
+  "uiComponent": "sensor",
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "decimals": 0,
+  "min": 0,
+  "max": 100
+}

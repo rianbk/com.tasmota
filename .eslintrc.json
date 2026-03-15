@@ -1,0 +1,16 @@
+{
+  "extends": "athom/homey-app",
+  "rules": {
+    "import/extensions": "off",
+    "import/no-unresolved": "off",
+    "node/no-missing-import": "off"
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.ts", "vitest.config.ts"],
+      "rules": {
+        "node/no-unpublished-import": "off"
+      }
+    }
+  ]
+}

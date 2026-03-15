@@ -1,0 +1,31 @@
+{
+  "drivers": {
+    "tasmota_light": {
+      "name": "Tasmota Lamp"
+    }
+  },
+  "settings": {
+    "mqtt_host": "MQTT Broker Host",
+    "mqtt_port": "Poort",
+    "mqtt_username": "Gebruikersnaam",
+    "mqtt_password": "Wachtwoord",
+    "mqtt_tls": "TLS inschakelen",
+    "mqtt_verify_tls": "TLS-certificaat verifiëren",
+    "show_offline_devices": "Offline apparaten tonen tijdens koppelen",
+    "title": "MQTT-instellingen",
+    "section_connection": "Verbinding",
+    "section_options": "Opties",
+    "mqtt_host_placeholder": "192.168.1.100",
+    "mqtt_username_optional": "Gebruikersnaam (optioneel)",
+    "mqtt_password_optional": "Wachtwoord (optioneel)",
+    "error_host_required": "Host is verplicht",
+    "error_port_range": "Poort moet tussen 1 en 65535 liggen",
+    "save": "Opslaan",
+    "status_checking": "Controleren...",
+    "status_connected": "MQTT: verbonden",
+    "status_disconnected": "MQTT: niet verbonden",
+    "status_saved": "Instellingen opgeslagen.",
+    "status_no_changes": "Geen wijzigingen om op te slaan.",
+    "status_error": "Fout: "
+  }
+}
