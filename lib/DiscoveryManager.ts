@@ -122,9 +122,9 @@ export class DiscoveryManager extends EventEmitter {
     }
   }
 
-  /** Get all discovered devices */
+  /** Get all discovered devices (returns a copy to prevent external mutation) */
   getDiscoveredDevices(): Map<string, DiscoveredDevice> {
-    return this.devices;
+    return new Map(this.devices);
   }
 
   /** Get a specific device by MAC */

@@ -1,8 +1,6 @@
 import {
-  type TopicParts, buildTopic, PREFIX_CMND, PREFIX_STAT, PREFIX_TELE,
+  type TopicParts, buildTopic,
 } from './TopicBuilder.js';
-
-export { PREFIX_CMND, PREFIX_STAT, PREFIX_TELE };
 
 /** Light subtype values */
 export const LIGHT_DIMMER = 1;
@@ -10,6 +8,9 @@ export const LIGHT_CW = 2;
 export const LIGHT_RGB = 3;
 export const LIGHT_RGBW = 4;
 export const LIGHT_RGBCW = 5;
+
+/** WiFi monitoring capabilities shared by all device types */
+const WIFI_CAPABILITIES = ['measure_signal_strength', 'measure_wifi_percent'];
 
 /** Relay type values */
 export const RELAY_NONE = 0;
@@ -131,6 +132,27 @@ export class TasmotaDiscoveryPayload {
     return buildTopic(this.topicParts, prefixIndex, command);
   }
 
+  /** Common settings shared by all device types during pairing */
+  getBaseSettings(): Record<string, unknown> {
+    return {
+      t: this.raw.t,
+      ft: this.raw.ft,
+      tp: this.raw.tp,
+      mac: this.raw.mac,
+      hn: this.raw.hn ?? '',
+      ip: this.raw.ip,
+      model: this.raw.md,
+      firmware: this.raw.sw,
+      ofln: this.raw.ofln,
+      onln: this.raw.onln,
+    };
+  }
+
+  /** Display name: first friendly name or device name */
+  get displayName(): string {
+    return this.raw.fn[0] || this.raw.dn;
+  }
+
   /** Whether relay at given index is a light (type 2, or type 1 with so.30 set) */
   isLight(relayIndex: number = 0): boolean {
     const rl = this.relays[relayIndex];
@@ -142,6 +164,26 @@ export class TasmotaDiscoveryPayload {
   /** Whether any relay is a light */
   hasLight(): boolean {
     return this.relays.some((_, i) => this.isLight(i));
+  }
+
+  /** Whether any relay is a plain relay (not a light, shutter, or iFan) */
+  hasRelay(): boolean {
+    return !this.isIfan && this.relays.some((r, i) => r === RELAY_RELAY && !this.isLight(i));
+  }
+
+  /** Count of plain relays (not lights or shutters) */
+  get relayCount(): number {
+    return this.relays.filter((r, i) => r === RELAY_RELAY && !this.isLight(i)).length;
+  }
+
+  /** Whether any relay is a shutter */
+  hasShutter(): boolean {
+    return this.relays.some((r) => r === RELAY_SHUTTER);
+  }
+
+  /** Whether this is a sensor-only device (no relays, no lights) */
+  hasSensorOnly(): boolean {
+    return this.relays.every((r) => r === RELAY_NONE) && this.lightSubtype === 0 && !this.isIfan;
   }
 
   /** Whether CT range is non-standard (so.82 set) */
@@ -163,8 +205,69 @@ export class TasmotaDiscoveryPayload {
     if (lt >= LIGHT_CW) caps.push('light_temperature');
     if (lt >= LIGHT_RGB) caps.push('light_hue', 'light_saturation', 'light_mode');
     // RGBCW has both temperature and hue/sat (already added)
-    caps.push('measure_signal_strength', 'measure_wifi_percent');
+    caps.push(...WIFI_CAPABILITIES);
     return caps;
+  }
+
+  /** Get capabilities list for a relay/switch device */
+  getRelayCapabilities(): string[] {
+    return ['onoff', 'measure_power', 'meter_power', ...WIFI_CAPABILITIES];
+  }
+
+  /** Get capabilities list for a shutter device */
+  getShutterCapabilities(): string[] {
+    const caps = ['windowcoverings_set', 'windowcoverings_state'];
+    if (this.raw.sht && this.raw.sht.length > 0) {
+      caps.push('windowcoverings_tilt_set');
+    }
+    caps.push(...WIFI_CAPABILITIES);
+    return caps;
+  }
+
+  /** Get capabilities list for an iFan device */
+  getFanCapabilities(): string[] {
+    return ['onoff', 'fan_speed', ...WIFI_CAPABILITIES];
+  }
+
+  /**
+   * Get capabilities list for a sensor device based on the sensors discovery payload.
+   * The `sn` field contains keys like "AM2301": {"Temperature":"","Humidity":""}.
+   */
+  static getSensorCapabilities(sensors: SensorsPayload | null): string[] {
+    const caps: string[] = [];
+    if (!sensors?.sn) return [...WIFI_CAPABILITIES];
+
+    let hasTemp = false;
+    let hasHumidity = false;
+    let hasPressure = false;
+
+    for (const [key, value] of Object.entries(sensors.sn)) {
+      if (key === 'Time' || key === 'TempUnit' || key === 'PressureUnit') continue;
+      if (typeof value === 'object' && value !== null) {
+        const fields = value as Record<string, unknown>;
+        if ('Temperature' in fields) hasTemp = true;
+        if ('Humidity' in fields) hasHumidity = true;
+        if ('Pressure' in fields) hasPressure = true;
+      }
+    }
+
+    if (hasTemp) caps.push('measure_temperature');
+    if (hasHumidity) caps.push('measure_humidity');
+    if (hasPressure) caps.push('measure_pressure');
+    caps.push(...WIFI_CAPABILITIES);
+    return caps;
+  }
+
+  /**
+   * Extract sensor keys from a sensors discovery payload (e.g. ["AM2301", "BME280"]).
+   * These are the keys to look for in SENSOR telemetry messages.
+   */
+  static getSensorKeys(sensors: SensorsPayload | null): string[] {
+    if (!sensors?.sn) return [];
+    const skipKeys = new Set(['Time', 'TempUnit', 'PressureUnit', 'Switch1', 'Switch2']);
+    return Object.keys(sensors.sn).filter(
+      (k) => !skipKeys.has(k) && typeof sensors.sn[k] === 'object' && sensors.sn[k] !== null,
+    );
   }
 
   /** Validate this payload */

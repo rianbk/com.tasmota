@@ -10,6 +10,7 @@ import {
  */
 export default class TasmotaDeviceBase extends Homey.Device {
   private topicParts!: TopicParts;
+  private boundHandleMessage!: (topic: string, payload: string) => void;
 
   async onInit(): Promise<void> {
     const settings = this.getSettings();
@@ -21,8 +22,9 @@ export default class TasmotaDeviceBase extends Homey.Device {
       mac: settings.mac,
     };
 
+    this.boundHandleMessage = this.handleMessage.bind(this);
     const app = this.homey.app as TasmotaMqttApp;
-    app.registerMessageHandler(settings.t, this.handleMessage.bind(this));
+    app.registerMessageHandler(settings.t, this.boundHandleMessage);
 
     // Start unavailable until we hear from the device via LWT or state response
     await this.setUnavailable('Waiting for device...');
@@ -77,6 +79,10 @@ export default class TasmotaDeviceBase extends Homey.Device {
     if (suffix === 'STATE' || suffix === 'RESULT') {
       try {
         const data = JSON.parse(payload);
+        // Receiving a state response proves the device is online
+        if (!this.getAvailable()) {
+          this.setAvailable().catch(this.error);
+        }
         this.log(`State update: ${suffix}`);
         this.onTasmotaState(data);
       } catch {
@@ -100,22 +106,30 @@ export default class TasmotaDeviceBase extends Homey.Device {
     this.onMqttMessage(topic, suffix, payload);
   }
 
+  /** Set a capability value only if it has changed, to avoid unnecessary I/O */
+  protected setCapabilityValueIfChanged(cap: string, value: unknown): void {
+    if (this.getCapabilityValue(cap) !== value) {
+      this.setCapabilityValue(cap, value).catch(this.error);
+    }
+  }
+
   /** Override in subclass to handle STATE/RESULT data */
-  protected onTasmotaState(_data: Record<string, unknown>): void {
-    // Update WiFi RSSI if present
-    const wifi = _data['Wifi'] as Record<string, unknown> | undefined;
+  protected onTasmotaState(data: Record<string, unknown>): void {
+    const wifi = data['Wifi'] as Record<string, unknown> | undefined;
     if (wifi) {
       if (typeof wifi['Signal'] === 'number') {
-        this.setCapabilityValue('measure_signal_strength', wifi['Signal']).catch(this.error);
+        this.setCapabilityValueIfChanged('measure_signal_strength', wifi['Signal']);
       }
       if (typeof wifi['RSSI'] === 'number' && this.hasCapability('measure_wifi_percent')) {
-        this.setCapabilityValue('measure_wifi_percent', wifi['RSSI']).catch(this.error);
+        this.setCapabilityValueIfChanged('measure_wifi_percent', wifi['RSSI']);
       }
     }
 
-    // Sync PowerOnState from RESULT
-    if (typeof _data['PowerOnState'] === 'number') {
-      this.setSettings({ power_on_state: String(_data['PowerOnState']) }).catch(this.error);
+    if (typeof data['PowerOnState'] === 'number') {
+      const val = String(data['PowerOnState']);
+      if (this.getSetting('power_on_state') !== val) {
+        this.setSettings({ power_on_state: val }).catch(this.error);
+      }
     }
   }
 
@@ -125,7 +139,10 @@ export default class TasmotaDeviceBase extends Homey.Device {
     changedKeys: string[];
   }): Promise<void> {
     if (changedKeys.includes('power_on_state')) {
-      this.sendCommand('PowerOnState', newSettings.power_on_state as string);
+      const val = String(newSettings.power_on_state);
+      if (['0', '1', '2', '3', '4'].includes(val)) {
+        this.sendCommand('PowerOnState', val);
+      }
     }
   }
 
@@ -139,16 +156,17 @@ export default class TasmotaDeviceBase extends Homey.Device {
     // Base: no-op
   }
 
-  async onUninit(): Promise<void> {
+  private cleanup(): void {
     const app = this.homey.app as TasmotaMqttApp;
-    const settings = this.getSettings();
-    app.unregisterMessageHandler(settings.t);
+    app.unregisterMessageHandler(this.topicParts.t, this.boundHandleMessage);
+  }
+
+  async onUninit(): Promise<void> {
+    this.cleanup();
   }
 
   async onDeleted(): Promise<void> {
-    const app = this.homey.app as TasmotaMqttApp;
-    const settings = this.getSettings();
-    app.unregisterMessageHandler(settings.t);
+    this.cleanup();
   }
 }
 

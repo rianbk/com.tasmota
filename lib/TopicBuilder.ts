@@ -32,17 +32,22 @@ export const PREFIX_TELE = 2;
  * buildTopic({ ft: '%prefix%/%topic%/', tp: ['cmnd','stat','tele'], t: 'my_light' }, 0, 'POWER')
  * // → 'cmnd/my_light/POWER'
  */
+/** Sanitize a value for use in an MQTT topic segment (no /, +, #, or null bytes) */
+function sanitizeTopicSegment(value: string): string {
+  return value.replace(/[/+#\0]/g, '_');
+}
+
 export function buildTopic(parts: TopicParts, prefixIndex: number, command: string): string {
   let topic = parts.ft;
-  topic = topic.replace('%prefix%', parts.tp[prefixIndex]);
-  topic = topic.replace('%topic%', parts.t);
+  topic = topic.replace('%prefix%', sanitizeTopicSegment(parts.tp[prefixIndex]));
+  topic = topic.replace('%topic%', sanitizeTopicSegment(parts.t));
   if (parts.hn != null) {
-    topic = topic.replace('%hostname%', parts.hn);
+    topic = topic.replace('%hostname%', sanitizeTopicSegment(parts.hn));
   }
   if (parts.mac != null) {
-    topic = topic.replace('%id%', parts.mac.slice(-6));
+    topic = topic.replace('%id%', sanitizeTopicSegment(parts.mac.slice(-6)));
   }
-  return topic + command;
+  return topic + sanitizeTopicSegment(command);
 }
 
 /**

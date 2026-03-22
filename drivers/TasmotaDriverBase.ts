@@ -19,9 +19,9 @@ export default class TasmotaDriverBase extends Homey.Driver {
 
   /**
    * Override in subclass to filter discovery results to this driver's device type.
-   * Return null to skip the device.
+   * Return null to skip, a single device, or an array (e.g. for multi-relay).
    */
-  protected filterDevice(_config: TasmotaDiscoveryPayload): TasmotaPairDevice | null {
+  protected filterDevice(_config: TasmotaDiscoveryPayload): TasmotaPairDevice | TasmotaPairDevice[] | null {
     return null;
   }
 
@@ -35,13 +35,17 @@ export default class TasmotaDriverBase extends Homey.Driver {
 
     const showOffline = this.homey.settings.get('show_offline_devices') ?? false;
 
-    for (const [mac, entry] of discovered) {
-      if (pairedIds.has(mac)) continue;
+    for (const [, entry] of discovered) {
       if (!showOffline && !entry.online) continue;
 
-      const device = this.filterDevice(entry.config);
-      if (device) {
-        devices.push(device);
+      const result = this.filterDevice(entry.config);
+      if (!result) continue;
+
+      const candidates = Array.isArray(result) ? result : [result];
+      for (const device of candidates) {
+        if (!pairedIds.has(device.data.id)) {
+          devices.push(device);
+        }
       }
     }
 

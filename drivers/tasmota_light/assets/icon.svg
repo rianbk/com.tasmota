@@ -1,12 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1FA3EC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Bulb glass - rounder shape -->
-  <ellipse cx="32" cy="22" rx="16" ry="18"/>
-  <!-- Neck -->
-  <path d="M24 36 C24 42 26 44 26 44 L38 44 C38 44 40 42 40 36"/>
-  <!-- Screw base -->
-  <path d="M26 44 L26 52 C26 54 28 56 32 56 C36 56 38 54 38 52 L38 44"/>
-  <line x1="26" y1="47" x2="38" y2="47"/>
-  <line x1="26" y1="50" x2="38" y2="50"/>
-  <!-- Inner glow lines -->
-  <path d="M29 18 L32 28 L35 18" stroke-width="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" fill="none" stroke="currentColor" stroke-width="40" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse cx="480" cy="330" rx="240" ry="270"/>
+  <path d="M360 540 C360 630 390 660 390 660 L570 660 C570 660 600 630 600 540"/>
+  <path d="M390 660 L390 780 C390 810 420 840 480 840 C540 840 570 810 570 780 L570 660"/>
+  <line x1="390" y1="705" x2="570" y2="705"/>
+  <line x1="390" y1="750" x2="570" y2="750"/>
+  <path d="M435 270 L480 420 L525 270" stroke-width="24"/>
 </svg>

@@ -76,6 +76,15 @@
     <div class="status" id="status"></div>
   </form>
 
+  <fieldset class="homey-form-fieldset" style="margin-top: 20px;">
+    <legend class="homey-form-legend">Requirements</legend>
+    <ul style="font-size: 13px; color: #666; line-height: 1.6; padding-left: 20px; margin: 8px 0;">
+      <li>Tasmota firmware v9.2 or later</li>
+      <li>SetOption19 must be 0 (native discovery — this is the default)</li>
+      <li>MQTT must be configured on your Tasmota devices, pointing to the same broker</li>
+    </ul>
+  </fieldset>
+
   <script type="text/javascript">
     function onHomeyReady(Homey) {
       Homey.ready();

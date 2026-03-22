@@ -1,4 +1,6 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach, type Mock,
+} from 'vitest';
 
 /**
  * Tests for TasmotaLightDevice capability listener logic.
@@ -33,7 +35,6 @@ function createMockDevice(opts?: {
   capabilityValues?: Record<string, unknown>;
   settings?: Record<string, unknown>;
 }): MockDevice {
-  const caps = opts?.capabilities ?? ['onoff', 'dim', 'light_temperature', 'light_hue', 'light_saturation', 'light_mode'];
   const capValues: Record<string, unknown> = {
     onoff: true,
     dim: 0.5,
@@ -58,10 +59,6 @@ function createMockDevice(opts?: {
     return capValues[cap] ?? null;
   }
 
-  function hasCapability(cap: string): boolean {
-    return caps.includes(cap);
-  }
-
   function getSettings(): Record<string, unknown> {
     return settings;
   }
@@ -69,7 +66,6 @@ function createMockDevice(opts?: {
   // Replicate the handler logic from device.ts
   const handler = async (values: Record<string, unknown>): Promise<void> => {
     const onoff = values.onoff ?? getCapabilityValue('onoff');
-    const dim = values.dim ?? getCapabilityValue('dim');
 
     // onoff takes precedence
     if ('onoff' in values) {
@@ -159,7 +155,9 @@ function createMockDevice(opts?: {
     }
   };
 
-  return { commands, capabilities: capValues, settings, handler, onSettings, onTasmotaState, setSettingsSpy };
+  return {
+    commands, capabilities: capValues, settings, handler, onSettings, onTasmotaState, setSettingsSpy,
+  };
 }
 
 // --- Tests ---

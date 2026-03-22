@@ -1,6 +1,6 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
-  "id": "com.tasmota-mqtt",
+  "id": "com.tasmota",
   "version": "1.0.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
@@ -12,10 +12,12 @@
     "en": "Tasmota"
   },
   "description": {
-    "en": "Your Tasmota devices, right on Homey"
+    "en": "Control your Tasmota devices over MQTT — lights, switches, sensors, and more"
   },
   "category": [
-    "lights"
+    "lights",
+    "appliances",
+    "climate"
   ],
   "permissions": [],
   "brandColor": "#1FA3EC",
@@ -25,7 +27,7 @@
     "xlarge": "/assets/images/xlarge.png"
   },
   "author": {
-    "name": "rbk"
+    "name": "Rian Brooks-Kane"
   },
   "tags": {
     "en": [
@@ -34,14 +36,21 @@
       "smart light",
       "wifi light",
       "esp8266",
-      "esp32"
+      "esp32",
+      "switch",
+      "relay",
+      "sensor",
+      "shutter",
+      "blinds",
+      "fan",
+      "sonoff"
     ]
   },
   "bugs": {
-    "url": "https://github.com/rbk/com.tasmota-mqtt/issues"
+    "url": "https://github.com/rianbk/com.tasmota/issues"
   },
-  "source": "https://github.com/rbk/com.tasmota-mqtt",
-  "homepage": "https://github.com/rbk/com.tasmota-mqtt#readme",
+  "source": "https://github.com/rianbk/com.tasmota",
+  "homepage": "https://github.com/rianbk/com.tasmota#readme",
   "api": {
     "getMqttStatus": {
       "method": "get",
@@ -49,6 +58,141 @@
     }
   },
   "drivers": [
+    {
+      "name": {
+        "en": "Tasmota Fan"
+      },
+      "class": "fan",
+      "connectivity": [
+        "lan"
+      ],
+      "capabilities": [
+        "onoff",
+        "fan_speed",
+        "measure_signal_strength",
+        "measure_wifi_percent"
+      ],
+      "capabilitiesOptions": {
+        "onoff": {
+          "title": {
+            "en": "Light"
+          }
+        },
+        "measure_signal_strength": {
+          "title": {
+            "en": "WiFi Signal"
+          }
+        },
+        "measure_wifi_percent": {
+          "title": {
+            "en": "WiFi Quality"
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Behavior"
+          },
+          "children": [
+            {
+              "id": "power_on_state",
+              "type": "dropdown",
+              "label": {
+                "en": "Power-on state"
+              },
+              "value": "3",
+              "values": [
+                {
+                  "id": "0",
+                  "label": {
+                    "en": "Off"
+                  }
+                },
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "On"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "Toggle"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "Last state"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Device info"
+          },
+          "children": [
+            {
+              "id": "mac",
+              "type": "label",
+              "label": {
+                "en": "MAC address"
+              },
+              "value": ""
+            },
+            {
+              "id": "ip",
+              "type": "label",
+              "label": {
+                "en": "IP address"
+              },
+              "value": ""
+            },
+            {
+              "id": "model",
+              "type": "label",
+              "label": {
+                "en": "Model"
+              },
+              "value": ""
+            },
+            {
+              "id": "firmware",
+              "type": "label",
+              "label": {
+                "en": "Firmware"
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/tasmota_fan/assets/small.png",
+        "large": "/drivers/tasmota_fan/assets/large.png",
+        "xlarge": "/drivers/tasmota_fan/assets/xlarge.png"
+      },
+      "id": "tasmota_fan"
+    },
     {
       "name": {
         "en": "Tasmota Light"
@@ -214,9 +358,401 @@
         "xlarge": "/drivers/tasmota_light/assets/xlarge.png"
       },
       "id": "tasmota_light"
+    },
+    {
+      "name": {
+        "en": "Tasmota Sensor"
+      },
+      "class": "sensor",
+      "connectivity": [
+        "lan"
+      ],
+      "capabilities": [
+        "measure_temperature",
+        "measure_humidity",
+        "measure_pressure",
+        "measure_signal_strength",
+        "measure_wifi_percent"
+      ],
+      "capabilitiesOptions": {
+        "measure_signal_strength": {
+          "title": {
+            "en": "WiFi Signal"
+          }
+        },
+        "measure_wifi_percent": {
+          "title": {
+            "en": "WiFi Quality"
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Device info"
+          },
+          "children": [
+            {
+              "id": "mac",
+              "type": "label",
+              "label": {
+                "en": "MAC address"
+              },
+              "value": ""
+            },
+            {
+              "id": "ip",
+              "type": "label",
+              "label": {
+                "en": "IP address"
+              },
+              "value": ""
+            },
+            {
+              "id": "model",
+              "type": "label",
+              "label": {
+                "en": "Model"
+              },
+              "value": ""
+            },
+            {
+              "id": "firmware",
+              "type": "label",
+              "label": {
+                "en": "Firmware"
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/tasmota_sensor/assets/small.png",
+        "large": "/drivers/tasmota_sensor/assets/large.png",
+        "xlarge": "/drivers/tasmota_sensor/assets/xlarge.png"
+      },
+      "id": "tasmota_sensor"
+    },
+    {
+      "name": {
+        "en": "Tasmota Shutter"
+      },
+      "class": "blinds",
+      "connectivity": [
+        "lan"
+      ],
+      "capabilities": [
+        "windowcoverings_set",
+        "windowcoverings_state",
+        "windowcoverings_tilt_set",
+        "measure_signal_strength",
+        "measure_wifi_percent"
+      ],
+      "capabilitiesOptions": {
+        "measure_signal_strength": {
+          "title": {
+            "en": "WiFi Signal"
+          }
+        },
+        "measure_wifi_percent": {
+          "title": {
+            "en": "WiFi Quality"
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Behavior"
+          },
+          "children": [
+            {
+              "id": "power_on_state",
+              "type": "dropdown",
+              "label": {
+                "en": "Power-on state"
+              },
+              "value": "3",
+              "values": [
+                {
+                  "id": "0",
+                  "label": {
+                    "en": "Off"
+                  }
+                },
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "On"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "Toggle"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "Last state"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Device info"
+          },
+          "children": [
+            {
+              "id": "mac",
+              "type": "label",
+              "label": {
+                "en": "MAC address"
+              },
+              "value": ""
+            },
+            {
+              "id": "ip",
+              "type": "label",
+              "label": {
+                "en": "IP address"
+              },
+              "value": ""
+            },
+            {
+              "id": "model",
+              "type": "label",
+              "label": {
+                "en": "Model"
+              },
+              "value": ""
+            },
+            {
+              "id": "firmware",
+              "type": "label",
+              "label": {
+                "en": "Firmware"
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "images": {
+        "small": "/drivers/tasmota_shutter/assets/small.png",
+        "large": "/drivers/tasmota_shutter/assets/large.png",
+        "xlarge": "/drivers/tasmota_shutter/assets/xlarge.png"
+      },
+      "id": "tasmota_shutter"
+    },
+    {
+      "name": {
+        "en": "Tasmota Switch"
+      },
+      "class": "socket",
+      "connectivity": [
+        "lan"
+      ],
+      "capabilities": [
+        "onoff",
+        "measure_power",
+        "meter_power",
+        "measure_signal_strength",
+        "measure_wifi_percent"
+      ],
+      "capabilitiesOptions": {
+        "measure_signal_strength": {
+          "title": {
+            "en": "WiFi Signal"
+          }
+        },
+        "measure_wifi_percent": {
+          "title": {
+            "en": "WiFi Quality"
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Behavior"
+          },
+          "children": [
+            {
+              "id": "power_on_state",
+              "type": "dropdown",
+              "label": {
+                "en": "Power-on state"
+              },
+              "value": "3",
+              "values": [
+                {
+                  "id": "0",
+                  "label": {
+                    "en": "Off"
+                  }
+                },
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "On"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "Toggle"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "Last state"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Device info"
+          },
+          "children": [
+            {
+              "id": "mac",
+              "type": "label",
+              "label": {
+                "en": "MAC address"
+              },
+              "value": ""
+            },
+            {
+              "id": "ip",
+              "type": "label",
+              "label": {
+                "en": "IP address"
+              },
+              "value": ""
+            },
+            {
+              "id": "model",
+              "type": "label",
+              "label": {
+                "en": "Model"
+              },
+              "value": ""
+            },
+            {
+              "id": "firmware",
+              "type": "label",
+              "label": {
+                "en": "Firmware"
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "energy": {
+        "approximation": {
+          "usageOn": 5,
+          "usageOff": 0.5
+        }
+      },
+      "images": {
+        "small": "/drivers/tasmota_switch/assets/small.png",
+        "large": "/drivers/tasmota_switch/assets/large.png",
+        "xlarge": "/drivers/tasmota_switch/assets/xlarge.png"
+      },
+      "id": "tasmota_switch"
     }
   ],
   "capabilities": {
+    "fan_speed": {
+      "type": "enum",
+      "title": {
+        "en": "Fan Speed"
+      },
+      "values": [
+        {
+          "id": "off",
+          "title": {
+            "en": "Off"
+          }
+        },
+        {
+          "id": "low",
+          "title": {
+            "en": "Low"
+          }
+        },
+        {
+          "id": "medium",
+          "title": {
+            "en": "Medium"
+          }
+        },
+        {
+          "id": "high",
+          "title": {
+            "en": "High"
+          }
+        }
+      ],
+      "uiComponent": "picker",
+      "getable": true,
+      "setable": true
+    },
     "measure_wifi_percent": {
       "type": "number",
       "title": {

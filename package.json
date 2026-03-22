@@ -1,12 +1,12 @@
 {
-  "name": "com.tasmota-mqtt",
+  "name": "com.tasmota",
   "version": "1.0.0",
   "description": "Control Tasmota devices via MQTT native discovery on Homey",
-  "author": "rbk",
-  "license": "MIT",
+  "author": "Rian Brooks-Kane",
+  "license": "GPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rbk/com.tasmota-mqtt.git"
+    "url": "https://github.com/rianbk/com.tasmota.git"
   },
   "engines": {
     "node": ">=16.0.0"

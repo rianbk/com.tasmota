@@ -10,11 +10,10 @@ export default class TasmotaLightDevice extends TasmotaDeviceBase {
 
     // All light capabilities in one debounced listener (Homey best practice: coupled & debounced)
     const lightCaps = ['onoff', 'dim', 'light_temperature', 'light_hue', 'light_saturation', 'light_mode']
-      .filter(c => this.hasCapability(c));
+      .filter((c) => this.hasCapability(c));
 
     this.registerMultipleCapabilityListener(lightCaps, async (values) => {
       const onoff = values.onoff ?? this.getCapabilityValue('onoff');
-      const dim = values.dim ?? this.getCapabilityValue('dim');
 
       // onoff takes precedence
       if ('onoff' in values) {
@@ -74,33 +73,37 @@ export default class TasmotaLightDevice extends TasmotaDeviceBase {
       this.sendCommand('Fade', newSettings.fade ? '1' : '0');
     }
     if (changedKeys.includes('speed')) {
-      this.sendCommand('Speed', String(newSettings.speed));
+      const speed = Number(newSettings.speed);
+      if (Number.isInteger(speed) && speed >= 1 && speed <= 40) {
+        this.sendCommand('Speed', String(speed));
+      }
     }
   }
 
   protected override onTasmotaState(data: Record<string, unknown>): void {
     super.onTasmotaState(data);
 
-    // Power state
-    const power = data['POWER'] as string | undefined ?? data['POWER1'] as string | undefined;
+    const settings = this.getSettings();
+
+    // Power state — check POWER1 first (multi-relay), fall back to POWER (single-relay)
+    const power = data['POWER1'] as string | undefined ?? data['POWER'] as string | undefined;
     if (power != null) {
-      this.setCapabilityValue('onoff', power === 'ON').catch(this.error);
+      this.setCapabilityValueIfChanged('onoff', power === 'ON');
     }
 
     // Dimmer
     const dimmer = data['Dimmer'] as number | undefined;
     if (dimmer != null && this.hasCapability('dim')) {
-      this.setCapabilityValue('dim', dimmer / 100).catch(this.error);
+      this.setCapabilityValueIfChanged('dim', dimmer / 100);
     }
 
     // CT
     const ct = data['CT'] as number | undefined;
     if (ct != null && this.hasCapability('light_temperature')) {
-      const settings = this.getSettings();
       const ctMin = settings.ct_min as number ?? 153;
       const ctMax = settings.ct_max as number ?? 500;
       const normalized = (ct - ctMin) / (ctMax - ctMin);
-      this.setCapabilityValue('light_temperature', Math.max(0, Math.min(1, normalized))).catch(this.error);
+      this.setCapabilityValueIfChanged('light_temperature', Math.max(0, Math.min(1, normalized)));
     }
 
     // HSBColor
@@ -110,10 +113,10 @@ export default class TasmotaLightDevice extends TasmotaDeviceBase {
       if (parts.length === 3) {
         const [h, s] = parts;
         if (this.hasCapability('light_hue')) {
-          this.setCapabilityValue('light_hue', h / 360).catch(this.error);
+          this.setCapabilityValueIfChanged('light_hue', h / 360);
         }
         if (this.hasCapability('light_saturation')) {
-          this.setCapabilityValue('light_saturation', s / 100).catch(this.error);
+          this.setCapabilityValueIfChanged('light_saturation', s / 100);
         }
       }
     }
@@ -122,23 +125,20 @@ export default class TasmotaLightDevice extends TasmotaDeviceBase {
     if (this.hasCapability('light_mode')) {
       const color = data['Color'] as string | undefined;
       if (color != null) {
-        // Tasmota Color format: RRGGBBWWCC or RRGGBB
         // If first 6 hex digits are "000000", it's in CT/white mode
         const rgbPart = color.slice(0, 6);
         const mode = rgbPart === '000000' ? 'temperature' : 'color';
-        this.setCapabilityValue('light_mode', mode).catch(this.error);
+        this.setCapabilityValueIfChanged('light_mode', mode);
       }
     }
 
-    // WiFi RSSI is handled by the base class
-
-    // Sync Fade and Speed settings from device state
     const settingsUpdate: Record<string, unknown> = {};
     if (typeof data['Fade'] === 'string') {
-      settingsUpdate.fade = data['Fade'] === 'ON';
+      const fade = data['Fade'] === 'ON';
+      if (settings.fade !== fade) settingsUpdate.fade = fade;
     }
     if (typeof data['Speed'] === 'number') {
-      settingsUpdate.speed = data['Speed'];
+      if (settings.speed !== data['Speed']) settingsUpdate.speed = data['Speed'];
     }
     if (Object.keys(settingsUpdate).length > 0) {
       this.setSettings(settingsUpdate).catch(this.error);

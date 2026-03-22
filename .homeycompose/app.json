@@ -1,5 +1,5 @@
 {
-  "id": "com.tasmota-mqtt",
+  "id": "com.tasmota",
   "version": "1.0.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
@@ -9,9 +9,9 @@
     "en": "Tasmota"
   },
   "description": {
-    "en": "Your Tasmota devices, right on Homey"
+    "en": "Control your Tasmota devices over MQTT — lights, switches, sensors, and more"
   },
-  "category": ["lights"],
+  "category": ["lights", "appliances", "climate"],
   "permissions": [],
   "brandColor": "#1FA3EC",
   "images": {
@@ -20,16 +20,16 @@
     "xlarge": "/assets/images/xlarge.png"
   },
   "author": {
-    "name": "rbk"
+    "name": "Rian Brooks-Kane"
   },
   "tags": {
-    "en": ["tasmota", "mqtt", "smart light", "wifi light", "esp8266", "esp32"]
+    "en": ["tasmota", "mqtt", "smart light", "wifi light", "esp8266", "esp32", "switch", "relay", "sensor", "shutter", "blinds", "fan", "sonoff"]
   },
   "bugs": {
-    "url": "https://github.com/rbk/com.tasmota-mqtt/issues"
+    "url": "https://github.com/rianbk/com.tasmota/issues"
   },
-  "source": "https://github.com/rbk/com.tasmota-mqtt",
-  "homepage": "https://github.com/rbk/com.tasmota-mqtt#readme",
+  "source": "https://github.com/rianbk/com.tasmota",
+  "homepage": "https://github.com/rianbk/com.tasmota#readme",
   "api": {
     "getMqttStatus": {
       "method": "get",

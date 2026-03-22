@@ -82,20 +82,32 @@ export default class TasmotaMqttApp extends Homey.App {
    * Devices register themselves via `registerMessageHandler`.
    */
   // eslint-disable-next-line no-spaced-func, func-call-spacing
-  private messageHandlers = new Map<string, (topic: string, payload: string) => void>();
+  private messageHandlers = new Map<string, Set<(topic: string, payload: string) => void>>();
 
   registerMessageHandler(deviceTopic: string, handler: (topic: string, payload: string) => void): void {
-    this.messageHandlers.set(deviceTopic, handler);
+    if (!this.messageHandlers.has(deviceTopic)) {
+      this.messageHandlers.set(deviceTopic, new Set());
+    }
+    this.messageHandlers.get(deviceTopic)!.add(handler);
   }
 
-  unregisterMessageHandler(deviceTopic: string): void {
-    this.messageHandlers.delete(deviceTopic);
+  unregisterMessageHandler(deviceTopic: string, handler: (topic: string, payload: string) => void): void {
+    const handlers = this.messageHandlers.get(deviceTopic);
+    if (handlers) {
+      handlers.delete(handler);
+      if (handlers.size === 0) {
+        this.messageHandlers.delete(deviceTopic);
+      }
+    }
   }
 
   private routeMessage(topic: string, payload: string): void {
-    for (const [deviceTopic, handler] of this.messageHandlers) {
-      const parts = topic.split('/');
-      if (parts.length >= 3 && parts[1] === deviceTopic) {
+    const parts = topic.split('/');
+    if (parts.length < 3) return;
+    const deviceTopic = parts[1];
+    const handlers = this.messageHandlers.get(deviceTopic);
+    if (handlers) {
+      for (const handler of handlers) {
         handler(topic, payload);
       }
     }
