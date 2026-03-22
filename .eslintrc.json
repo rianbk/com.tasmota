@@ -14,6 +14,17 @@
       "rules": {
         "node/no-unpublished-import": "off"
       }
+    },
+    {
+      "files": ["scripts/**/*.ts"],
+      "rules": {
+        "no-console": "off",
+        "no-process-exit": "off",
+        "node/no-unpublished-import": "off",
+        "node/shebang": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "homey-app/global-timers": "off"
+      }
     }
   ]
 }

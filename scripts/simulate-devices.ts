@@ -1,4 +1,3 @@
-#!/usr/bin/env npx tsx
 /**
  * Simulates Tasmota devices by publishing realistic MQTT discovery and telemetry messages.
  * Usage: npx tsx scripts/simulate-devices.ts [mqtt://host:port]
@@ -26,7 +25,9 @@ const devices = [
       Color: '1E1400005A',
       Fade: 'ON',
       Speed: 4,
-      Wifi: { AP: 1, SSId: 'HomeNet', RSSI: 72, Signal: -64 },
+      Wifi: {
+        AP: 1, SSId: 'HomeNet', RSSI: 72, Signal: -64,
+      },
     }),
   },
   {
@@ -37,7 +38,9 @@ const devices = [
     lt_st: 0,
     state: () => ({
       POWER: Math.random() > 0.5 ? 'ON' : 'OFF',
-      Wifi: { AP: 1, SSId: 'HomeNet', RSSI: 85, Signal: -55 },
+      Wifi: {
+        AP: 1, SSId: 'HomeNet', RSSI: 85, Signal: -55,
+      },
     }),
     sensor: () => ({
       ENERGY: {
@@ -58,7 +61,9 @@ const devices = [
     state: () => ({
       POWER1: 'ON',
       POWER2: 'OFF',
-      Wifi: { AP: 1, SSId: 'HomeNet', RSSI: 60, Signal: -70 },
+      Wifi: {
+        AP: 1, SSId: 'HomeNet', RSSI: 60, Signal: -70,
+      },
     }),
   },
   {
@@ -69,7 +74,9 @@ const devices = [
     lt_st: 0,
     sensorDiscovery: { sn: { Time: '', AM2301: { Temperature: '', Humidity: '' }, TempUnit: '' }, ver: 1 },
     state: () => ({
-      Wifi: { AP: 1, SSId: 'HomeNet', RSSI: 65, Signal: -67 },
+      Wifi: {
+        AP: 1, SSId: 'HomeNet', RSSI: 65, Signal: -67,
+      },
     }),
     sensor: () => ({
       AM2301: {
@@ -87,8 +94,12 @@ const devices = [
     lt_st: 0,
     sho: [0],
     state: () => ({
-      Shutter1: { Position: 75, Direction: 0, Target: 75, Tilt: 0 },
-      Wifi: { AP: 1, SSId: 'HomeNet', RSSI: 78, Signal: -62 },
+      Shutter1: {
+        Position: 75, Direction: 0, Target: 75, Tilt: 0,
+      },
+      Wifi: {
+        AP: 1, SSId: 'HomeNet', RSSI: 78, Signal: -62,
+      },
     }),
   },
   {
@@ -101,7 +112,9 @@ const devices = [
     state: () => ({
       POWER1: 'ON',
       FanSpeed: 2,
-      Wifi: { AP: 1, SSId: 'HomeNet', RSSI: 90, Signal: -50 },
+      Wifi: {
+        AP: 1, SSId: 'HomeNet', RSSI: 90, Signal: -50,
+      },
     }),
   },
 ];
@@ -114,7 +127,7 @@ function makeDiscovery(dev: typeof devices[0]) {
     ft: '%prefix%/%topic%/',
     tp: ['cmnd', 'stat', 'tele'],
     mac: dev.mac,
-    ip: '192.168.1.' + (100 + devices.indexOf(dev)),
+    ip: `192.168.1.${100 + devices.indexOf(dev)}`,
     hn: dev.topic,
     md: 'Simulated Device',
     sw: '14.4.1',
@@ -146,7 +159,7 @@ client.on('connect', () => {
     if ((dev as any).sensorDiscovery) {
       const sensorsTopic = `tasmota/discovery/${dev.mac}/sensors`;
       client.publish(sensorsTopic, JSON.stringify((dev as any).sensorDiscovery), { retain: true });
-      console.log(`    + sensors discovery`);
+      console.log('    + sensors discovery');
     }
 
     // LWT online
@@ -174,13 +187,15 @@ client.on('connect', () => {
           } else if (command === 'Power' || command.startsWith('Power')) {
             client.publish(resultTopic, JSON.stringify({ [command.toUpperCase()]: msg.toUpperCase() }));
           } else if (command === 'PowerOnState') {
-            client.publish(resultTopic, JSON.stringify({ PowerOnState: parseInt(msg) || 3 }));
+            client.publish(resultTopic, JSON.stringify({ PowerOnState: parseInt(msg, 10) || 3 }));
           } else if (command === 'FanSpeed') {
-            client.publish(resultTopic, JSON.stringify({ FanSpeed: parseInt(msg) || 0 }));
+            client.publish(resultTopic, JSON.stringify({ FanSpeed: parseInt(msg, 10) || 0 }));
           } else if (command === 'ShutterPosition') {
-            const pos = parseInt(msg) || 0;
+            const pos = parseInt(msg, 10) || 0;
             client.publish(resultTopic, JSON.stringify({
-              Shutter1: { Position: pos, Direction: 0, Target: pos, Tilt: 0 },
+              Shutter1: {
+                Position: pos, Direction: 0, Target: pos, Tilt: 0,
+              },
             }));
           } else if (command === 'Dimmer' || command === 'CT' || command === 'HSBColor') {
             client.publish(resultTopic, JSON.stringify({ [command]: msg }));
