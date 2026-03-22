@@ -1,6 +1,10 @@
 # Tasmota for Homey
 
+[![Validate & Test](https://github.com/rianbk/com.tasmota/actions/workflows/validate.yml/badge.svg)](https://github.com/rianbk/com.tasmota/actions/workflows/validate.yml)
+
 Control your Tasmota-flashed devices directly from Homey using MQTT. Devices are automatically discovered via Tasmota's native MQTT discovery protocol — no manual configuration needed.
+
+**[Install from the Homey App Store](https://homey.app/en-au/app/com.tasmota/Tasmota/)**
 
 ## Supported Device Types
 

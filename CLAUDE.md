@@ -94,6 +94,19 @@ Driver settings are defined in `driver.compose.json` and synced from the device:
 - **Speed** (light) — number 1-40, synced from STATE `Speed` field, sent via `Speed N`
 - **Device info** (mac, ip, model, firmware) — read-only labels populated during pairing
 
+### Security
+
+- **Topic sanitization** — `TopicBuilder.sanitizeTopicSegment()` strips `/`, `+`, `#`, and null bytes from all topic segments to prevent MQTT injection
+- **Settings validation** — `PowerOnState` validated against `[0-4]`, `Speed` clamped to `1-40` before sending Tasmota commands
+- **Guarded writes** — `setCapabilityValueIfChanged()` in base class compares current value before writing to avoid unnecessary I/O
+- **Immutable discovery cache** — `getDiscoveredDevices()` returns a copy to prevent external mutation
+
+### Publishing
+
+- **App Store**: Published via GitHub Actions workflow (`publish.yml`) using `HOMEY_PAT` secret
+- **Versioning**: Use the `version.yml` workflow to bump version and create GitHub releases
+- **CI**: `validate.yml` runs build, lint, test, and `homey app validate` on push to main and PRs
+
 ### Localization
 
 English only (`en`). No other locale files.
