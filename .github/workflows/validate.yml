@@ -5,15 +5,8 @@ on:
   pull_request:
 
 jobs:
-  validate:
-    name: Validate Homey App
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: athombv/github-action-homey-app-validate@master
-
   test:
-    name: Run Tests
+    name: Validate, Lint & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -21,5 +14,8 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - run: npm run build
       - run: npm run lint
       - run: npm test
+      - name: Validate Homey App
+        run: npx --yes homey app validate --level publish
