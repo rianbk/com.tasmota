@@ -17,7 +17,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "mqtt": "^5.10.0"
+    "mqtt": "^5.15.1"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.8",
