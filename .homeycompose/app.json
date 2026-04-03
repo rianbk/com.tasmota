@@ -1,17 +1,23 @@
 {
   "id": "com.tasmota",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "runtime": "nodejs",
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "name": {
     "en": "Tasmota"
   },
   "description": {
     "en": "Control your Tasmota devices over MQTT — lights, switches, sensors, and more"
   },
-  "category": ["lights", "appliances", "climate"],
+  "category": [
+    "lights",
+    "appliances",
+    "climate"
+  ],
   "permissions": [],
   "brandColor": "#1FA3EC",
   "images": {
@@ -23,7 +29,21 @@
     "name": "Rian Brooks-Kane"
   },
   "tags": {
-    "en": ["tasmota", "mqtt", "smart light", "wifi light", "esp8266", "esp32", "switch", "relay", "sensor", "shutter", "blinds", "fan", "sonoff"]
+    "en": [
+      "tasmota",
+      "mqtt",
+      "smart light",
+      "wifi light",
+      "esp8266",
+      "esp32",
+      "switch",
+      "relay",
+      "sensor",
+      "shutter",
+      "blinds",
+      "fan",
+      "sonoff"
+    ]
   },
   "bugs": {
     "url": "https://github.com/rianbk/com.tasmota/issues"
