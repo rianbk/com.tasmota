@@ -12,7 +12,7 @@
     "en": "Tasmota"
   },
   "description": {
-    "en": "Control your Tasmota devices over MQTT — lights, switches, sensors, and more"
+    "en": "Open source firmware for ESP devices"
   },
   "category": [
     "lights",
