@@ -1,6 +1,6 @@
 {
   "id": "com.tasmota",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "runtime": "nodejs",
@@ -53,8 +53,12 @@
   "support": "https://community.homey.app/t/app-pro-tasmota-control-your-tasmota-devices-over-mqtt",
   "contributing": {
     "donate": {
-      "githubSponsors": { "username": "rianbk" },
-      "paypal": { "username": "rianbk" }
+      "githubSponsors": {
+        "username": "rianbk"
+      },
+      "paypal": {
+        "username": "rianbk"
+      }
     }
   },
   "api": {
