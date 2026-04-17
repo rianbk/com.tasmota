@@ -50,6 +50,13 @@
   },
   "source": "https://github.com/rianbk/com.tasmota",
   "homepage": "https://github.com/rianbk/com.tasmota#readme",
+  "support": "https://community.homey.app/t/app-pro-tasmota-control-your-tasmota-devices-over-mqtt",
+  "contributing": {
+    "donate": {
+      "githubSponsors": { "username": "rianbk" },
+      "paypal": { "username": "rianbk" }
+    }
+  },
   "api": {
     "getMqttStatus": {
       "method": "get",
