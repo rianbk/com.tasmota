@@ -7,6 +7,11 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - dependencies
+    ignore:
+      # eslint-config-athom is pinned to legacy plugins that cap eslint at 7/8.
+      # Revisit when athombv/eslint-config-athom#57 (flat config) lands.
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
