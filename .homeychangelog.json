@@ -10,5 +10,8 @@
   },
   "1.0.3": {
     "en": "Add community forum link and donation options (GitHub Sponsors, PayPal)"
+  },
+  "1.0.4": {
+    "en": "Refreshed driver icons to match Homey's design guidelines."
   }
 }
