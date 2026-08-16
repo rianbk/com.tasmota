@@ -66,6 +66,10 @@
     "getMqttStatus": {
       "method": "get",
       "path": "/mqtt-status"
+    },
+    "testMqttConnection": {
+      "method": "get",
+      "path": "/test-mqtt-connection"
     }
   },
   "drivers": [
