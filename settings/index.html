@@ -7,6 +7,9 @@
     .mqtt-status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
     .mqtt-status-dot.connected { background: #2ecc71; }
     .mqtt-status-dot.disconnected { background: #e74c3c; }
+    .mqtt-error-detail { color: #e74c3c; font-size: 12px; margin-top: 4px; margin-bottom: 4px; font-family: monospace; display: none; }
+    .mqtt-hint { color: #666; font-size: 12px; margin-top: 4px; display: none; }
+    .test-raw-error { color: #999; font-size: 11px; font-family: monospace; margin-top: 2px; }
     .field-error { color: #e74c3c; font-size: 12px; margin-top: 4px; display: none; }
     input.invalid { border-color: #e74c3c; }
   </style>
@@ -16,6 +19,8 @@
     <span class="mqtt-status-dot" id="mqtt_status_dot"></span>
     <span id="mqtt_status_text" data-i18n="settings.status_checking">Checking...</span>
   </div>
+  <div class="mqtt-error-detail" id="mqtt_error_detail"></div>
+  <div class="mqtt-hint" id="mqtt_hint" data-i18n="settings.hint_disconnected">Ensure your MQTT broker is running and reachable at the configured address.</div>
 
   <form class="homey-form">
     <fieldset class="homey-form-fieldset">
@@ -73,6 +78,7 @@
     </fieldset>
 
     <button type="button" class="homey-button-primary-full" id="save" data-i18n="settings.save">Save</button>
+    <button type="button" class="homey-button-primary-full" id="test_connection" style="margin-top: 8px; background: #555;" data-i18n="settings.test_connection">Test Connection</button>
     <div class="status" id="status"></div>
   </form>
 
@@ -98,17 +104,30 @@
         Homey.api('GET', '/mqtt-status', function(err, result) {
           var dot = document.getElementById('mqtt_status_dot');
           var text = document.getElementById('mqtt_status_text');
+          var errorDetail = document.getElementById('mqtt_error_detail');
+          var hint = document.getElementById('mqtt_hint');
           if (err || !result) {
             dot.className = 'mqtt-status-dot disconnected';
             text.textContent = Homey.__('settings.status_disconnected');
+            errorDetail.style.display = 'none';
+            hint.style.display = 'block';
             return;
           }
           if (result.connected) {
             dot.className = 'mqtt-status-dot connected';
             text.textContent = Homey.__('settings.status_connected');
+            errorDetail.style.display = 'none';
+            hint.style.display = 'none';
           } else {
             dot.className = 'mqtt-status-dot disconnected';
             text.textContent = Homey.__('settings.status_disconnected');
+            if (result.error) {
+              errorDetail.textContent = result.error;
+              errorDetail.style.display = 'block';
+            } else {
+              errorDetail.style.display = 'none';
+            }
+            hint.style.display = 'block';
           }
         });
       }
@@ -205,6 +224,49 @@
               }
             }
           });
+        });
+      });
+      document.getElementById('test_connection').addEventListener('click', function() {
+        if (!validateFields()) return;
+        var btn = document.getElementById('test_connection');
+        var statusEl = document.getElementById('status');
+        btn.disabled = true;
+        btn.textContent = Homey.__('settings.test_testing');
+        statusEl.innerHTML = '';
+
+        function friendlyError(raw) {
+          if (!raw) return null;
+          if (raw.indexOf('ECONNREFUSED') !== -1) return 'Broker not reachable. Check the IP address and make sure your MQTT broker is running.';
+          if (raw.indexOf('Not authorized') !== -1 || raw.indexOf('Bad username or password') !== -1) return 'Authentication failed. Check your username and password.';
+          if (raw.indexOf('TLS') !== -1 || raw.indexOf('SSL') !== -1) return 'TLS mismatch. Your broker may not support TLS on this port. Try disabling "Enable TLS" or use port 8883.';
+          if (raw.indexOf('timed out') !== -1 || raw.indexOf('ETIMEDOUT') !== -1) return 'Broker not responding. The address may be wrong, or the broker is on a different network.';
+          if (raw.indexOf('ENOTFOUND') !== -1) return 'Hostname not found. Check the broker address for typos.';
+          if (raw.indexOf('EHOSTUNREACH') !== -1) return 'Host unreachable. The broker may be on a different network or subnet.';
+          if (raw.indexOf('Server unavailable') !== -1) return 'Broker is temporarily unavailable. Try again in a moment.';
+          return null;
+        }
+
+        function showError(rawMsg) {
+          var friendly = friendlyError(rawMsg);
+          if (friendly) {
+            statusEl.innerHTML = '<div style="color:#e74c3c;">✗ ' + friendly + '</div><div class="test-raw-error">' + rawMsg + '</div>';
+          } else {
+            statusEl.innerHTML = '<div style="color:#e74c3c;">✗ Connection failed: ' + rawMsg + '</div>';
+          }
+        }
+
+        Homey.api('GET', '/test-mqtt-connection', function(err, result) {
+          btn.disabled = false;
+          btn.textContent = Homey.__('settings.test_connection');
+          if (err || !result) {
+            showError(err ? (err.message || String(err)) : 'No response from app');
+            return;
+          }
+          if (result.success) {
+            statusEl.innerHTML = '<div style="color:#2ecc71;">✓ Connection successful!</div>';
+          } else {
+            showError(result.message || 'Unknown error');
+          }
         });
       });
     }

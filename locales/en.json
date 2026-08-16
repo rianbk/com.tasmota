@@ -24,6 +24,11 @@
     "status_checking": "Checking...",
     "status_connected": "MQTT: connected",
     "status_disconnected": "MQTT: not connected",
+    "hint_disconnected": "Ensure your MQTT broker is running and reachable at the configured address.",
+    "test_connection": "Test Connection",
+    "test_testing": "Testing...",
+    "test_success": "✓ Connection successful!",
+    "test_failed": "✗ Connection failed: ",
     "status_saved": "Settings saved.",
     "status_no_changes": "No changes to save.",
     "status_error": "Error: "

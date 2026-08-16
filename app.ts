@@ -5,6 +5,7 @@ import { DiscoveryManager } from './lib/DiscoveryManager.js';
 export default class TasmotaMqttApp extends Homey.App {
   mqttClient!: MqttClient;
   discoveryManager!: DiscoveryManager;
+  lastMqttError: string | null = null;
 
   async onInit(): Promise<void> {
     this.mqttClient = new MqttClient();
@@ -12,6 +13,7 @@ export default class TasmotaMqttApp extends Homey.App {
 
     this.mqttClient.on('connected', () => {
       this.log('MQTT connected');
+      this.lastMqttError = null;
       this.discoveryManager.start();
       // Subscribe to stat/tele wildcards for all devices
       // Default Tasmota ft is "%prefix%/%topic%/" → stat/<topic>/RESULT, tele/<topic>/STATE
@@ -23,6 +25,7 @@ export default class TasmotaMqttApp extends Homey.App {
     });
 
     this.mqttClient.on('error', (err: Error) => {
+      this.lastMqttError = err.message;
       this.error('MQTT error:', err.message);
     });
 
