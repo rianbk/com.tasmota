@@ -31,6 +31,33 @@ Multi-relay devices (e.g., Sonoff Dual, 4CH) automatically create separate Homey
 2. Go to the app settings and enter your MQTT broker address and credentials
 3. Add devices — your Tasmota devices will appear automatically in the pairing list
 
+## Troubleshooting
+
+### My device doesn't show up when pairing
+
+This app uses Tasmota's **native MQTT discovery** (`SetOption19 0`). If your device has `SetOption19 1` (legacy Home Assistant discovery), Tasmota stops publishing native discovery topics and the device won't appear in the pairing list — even though it's connected to MQTT.
+
+To fix this, run the following in the device's Tasmota console:
+
+```
+SetOption19 0
+Restart 1
+```
+
+The device should appear in the pairing list after it reboots.
+
+> **Note:** `SetOption19 0` is the Tasmota default. You may have `SetOption19 1` if you previously used a Home Assistant–based integration.
+
+### My device was working but disappeared
+
+If a device was previously paired and stops responding, check:
+
+1. **MQTT broker** — is it still running and reachable?
+2. **Device online** — check the Tasmota web UI or `tele/<topic>/LWT` for `Online`
+3. **Broker credentials** — verify in the app settings (Settings → MQTT)
+
+Use the **Test Connection** button in the app settings to verify broker connectivity.
+
 ## Development
 
 ```bash
